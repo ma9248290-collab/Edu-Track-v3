@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -74,7 +75,21 @@
             </div>
             
             <div id="students-view" class="view-section" style="display: none;">
-                <section id="students-overview" class="students-section"><div class="section-header"><h2>سجل الطلاب الشامل</h2><div class="header-actions"><input type="text" id="searchInput" placeholder="بحث بالاسم أو الكود..." class="custom-input" onkeyup="searchStudent()" style="width: 250px;"><button class="add-btn" onclick="openModal('addStudentModal')">+ تسجيل طالب</button></div></div><div class="table-container"><table class="students-table"><thead><tr><th>الكود</th><th>اسم الطالب</th><th>الصف</th><th>المجموعة</th><th>إجراءات</th></tr></thead><tbody id="students-list"></tbody></table></div></section>
+                
+                <section id="students-overview" class="students-section"><div class="section-header"><h2>سجل الطلاب الشامل</h2>
+                    <div class="header-actions">
+    <input type="text" id="searchInput" placeholder="بحث بالاسم أو الكود..." class="custom-input" onkeyup="searchStudent()" style="width: 250px;">
+    
+    <button class="theme-btn" onclick="downloadExcelTemplate()" style="border-color: #10b981; color: #10b981;">📄 تحميل نموذج الإكسيل</button>
+
+    <div style="position: relative; display: inline-block;">
+        <input type="file" id="importExcelInput" accept=".xlsx, .xls" style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;" onchange="importStudentsFromExcel(event)">
+        <button class="add-btn" style="background-color: #10b981;">📥 استيراد</button>
+    </div>
+
+    <button class="add-btn" onclick="openModal('addStudentModal')">+ تسجيل طالب</button>
+</div>
+</div><div class="table-container"><table class="students-table"><thead><tr><th>الكود</th><th>اسم الطالب</th><th>الصف</th><th>المجموعة</th><th>إجراءات</th></tr></thead><tbody id="students-list"></tbody></table></div></section>
                 <section id="student-profile-view" class="students-section print-area" style="display: none;">
                     <div class="no-print" style="display: flex; justify-content: space-between; margin-bottom: 20px;"><button class="theme-btn" onclick="backToStudents()">🔙 عودة</button><div style="display: flex; gap: 10px;"><button class="add-btn admin-only" onclick="openEditStudentModal()">✏️ تعديل الطالب</button><button class="theme-btn" onclick="window.print()" style="border-color: var(--primary-color); color: var(--primary-color);">📄 طباعة تقرير</button></div></div>
                     <div class="profile-header"><div class="profile-avatar">🎓</div><div class="profile-info-main"><h2 id="profile-name">اسم الطالب</h2><p id="profile-code-group" style="color: var(--primary-color); font-weight: bold;">الكود | المجموعة</p></div><div class="no-print" style="margin-right: auto; display: flex; gap: 10px; align-items: center;"><button class="icon-btn" id="wa-student-btn" style="background-color: #25D366; color: white; border:none;">💬 واتس الطالب</button><button class="icon-btn" id="wa-parent-btn" style="background-color: #128C7E; color: white; border:none;">💬 واتس ولي الأمر</button><button class="icon-btn danger admin-only" onclick="deleteStudentFromProfile()">🗑️ حذف</button></div></div>
@@ -89,7 +104,7 @@
                 <section id="sessions-overview" class="students-section"><div class="section-header"><h2>إدارة الحصص</h2><button class="add-btn" onclick="openModal('addSessionModal')">+ فتح حصة</button></div><div class="stats-grid" id="sessions-grid"></div></section>
                 <section id="session-details-view" class="students-section" style="display: none;">
                     <div class="section-header"><div><button class="theme-btn" onclick="backToSessions()">🔙 عودة</button><h2 id="current-session-title"></h2></div><div id="session-status-badge"></div></div>
-                    <div class="barcode-scanner-box"><h4 style="color: var(--success-color); margin-bottom: 10px;">📠 رصد سريع (بالكود أو الاسم)</h4><div style="display: flex; gap: 10px;"><input type="text" id="attendanceBarcode" class="custom-input" style="flex: 1; font-weight: bold;" placeholder="كود الطالب أو اسمه..."><button class="icon-btn" onclick="startCameraScanner('attendanceBarcode')" style="margin: 0; background-color: var(--primary-color); color: white; border: none;">📷 كاميرا</button></div></div>
+                    <div class="barcode-scanner-box"><h4 style="color: var(--success-color); margin-bottom: 10px;">📠 رصد سريع (بالكود أو الاسم)</h4><div style="display: flex; gap: 10px;"><input type="text" id="attendanceBarcode" class="custom-input" style="flex: 1; font-weight: bold;" placeholder="كود الطالب أو اسمه..."><button class="icon-btn" onclick="startCameraScanner('attendanceBarcode')" style="margin: 0; background-color: var(--primary-color); color: white; border: none;">📷 كاميرا</button><button class="icon-btn voice-btn" id="voiceBtn_attendance" onclick="toggleVoiceRecognition('attendance', 'attendanceBarcode')">🎙️ رصد بالصوت</button></div></div>
                     <div class="table-container"><table class="students-table"><thead><tr><th>الكود</th><th>الطالب</th><th>الهاتف</th><th>السابق</th><th>الحالة</th><th>تسجيل يدوي</th></tr></thead><tbody id="attendance-list"></tbody></table></div>
                 </section>
             </div>
@@ -98,7 +113,7 @@
                 <section id="hw-overview" class="students-section"><div class="section-header"><h2>الواجبات</h2><button class="add-btn hw-btn" onclick="openModal('addHwModal')">+ تكليف بواجب</button></div><div class="stats-grid" id="hw-grid"></div></section>
                 <section id="hw-details-view" class="students-section" style="display: none;">
                     <div class="section-header"><div><button class="theme-btn" onclick="backToHw()">🔙 عودة</button><h2 id="current-hw-title"></h2></div></div>
-                    <div class="barcode-scanner-box"><h4 style="color: var(--hw-color); margin-bottom: 10px;">📠 تقييم سريع (بالكود أو الاسم)</h4><div style="display:flex;gap:10px;"><input type="text" id="hwBarcodeCode" class="custom-input" style="flex:2" placeholder="كود الطالب أو اسمه..."><button class="icon-btn" onclick="startCameraScanner('hwBarcodeCode')" style="margin: 0; background-color: var(--hw-color); color: black; border: none;">📷 كاميرا</button><input type="number" id="hwBarcodeGrade" class="custom-input" style="flex:1" placeholder="الدرجة"><button class="save-btn hw-btn" style="width:100px;margin:0;" onclick="submitHwBarcodeGrade()">رصد</button></div></div>
+                    <div class="barcode-scanner-box"><h4 style="color: var(--hw-color); margin-bottom: 10px;">📠 تقييم سريع (بالكود أو الاسم)</h4><div style="display:flex;gap:10px;"><input type="text" id="hwBarcodeCode" class="custom-input" style="flex:2" placeholder="كود الطالب أو اسمه..."><button class="icon-btn" onclick="startCameraScanner('hwBarcodeCode')" style="margin: 0; background-color: var(--hw-color); color: black; border: none;">📷 كاميرا</button><button class="icon-btn voice-btn" id="voiceBtn_hw" onclick="toggleVoiceRecognition('hw', 'hwBarcodeCode')">🎙️ رصد بالصوت</button><input type="number" id="hwBarcodeGrade" class="custom-input" style="flex:1" placeholder="الدرجة"><button class="save-btn hw-btn" style="width:100px;margin:0;" onclick="submitHwBarcodeGrade()">رصد</button></div></div>
                     <div class="table-container"><table class="students-table"><thead><tr><th>الكود</th><th>الطالب</th><th>الهاتف</th><th>السابق</th><th>الدرجة</th><th>يدوي</th></tr></thead><tbody id="hw-grades-list"></tbody></table></div>
                 </section>
             </div>
@@ -107,7 +122,7 @@
                 <section id="exams-overview" class="students-section"><div class="section-header"><h2>الامتحانات</h2><button class="add-btn exam-btn" onclick="openModal('addExamModal')">+ إنشاء امتحان</button></div><div class="stats-grid" id="exams-grid"></div></section>
                 <section id="exam-details-view" class="students-section" style="display: none;">
                     <div class="section-header"><div><button class="theme-btn" onclick="backToExams()">🔙 عودة</button><h2 id="current-exam-title"></h2></div></div>
-                    <div class="barcode-scanner-box"><h4 style="color: var(--exam-color); margin-bottom: 10px;">📠 رصد سريع (بالكود أو الاسم)</h4><div style="display:flex;gap:10px;"><input type="text" id="examBarcodeCode" class="custom-input" style="flex:2" placeholder="كود الطالب أو اسمه..."><button class="icon-btn" onclick="startCameraScanner('examBarcodeCode')" style="margin: 0; background-color: var(--exam-color); color: white; border: none;">📷 كاميرا</button><input type="number" id="examBarcodeGrade" class="custom-input" style="flex:1" placeholder="الدرجة"><button class="save-btn exam-btn" style="width:100px;margin:0;" onclick="submitExamBarcodeGrade()">رصد</button></div></div>
+                    <div class="barcode-scanner-box"><h4 style="color: var(--exam-color); margin-bottom: 10px;">📠 رصد سريع (بالكود أو الاسم)</h4><div style="display:flex;gap:10px;"><input type="text" id="examBarcodeCode" class="custom-input" style="flex:2" placeholder="كود الطالب أو اسمه..."><button class="icon-btn" onclick="startCameraScanner('examBarcodeCode')" style="margin: 0; background-color: var(--exam-color); color: white; border: none;">📷 كاميرا</button><button class="icon-btn voice-btn" id="voiceBtn_exam" onclick="toggleVoiceRecognition('exam', 'examBarcodeCode')">🎙️ رصد بالصوت</button><input type="number" id="examBarcodeGrade" class="custom-input" style="flex:1" placeholder="الدرجة"><button class="save-btn exam-btn" style="width:100px;margin:0;" onclick="submitExamBarcodeGrade()">رصد</button></div></div>
                     <div class="table-container"><table class="students-table"><thead><tr><th>الكود</th><th>الطالب</th><th>الهاتف</th><th>السابق</th><th>الدرجة</th><th>يدوي</th></tr></thead><tbody id="grades-list"></tbody></table></div>
                 </section>
             </div>
@@ -151,7 +166,36 @@
     <div id="customConfirmModal" class="modal"><div class="modal-content" style="width: 350px; text-align: center; margin: 20% auto;"><h3 id="confirmMessage" style="margin-bottom: 25px;">هل أنت متأكد؟</h3><div style="display: flex; gap: 10px;"><button id="confirmYesBtn" class="save-btn danger" style="background-color: var(--danger-color); margin:0;">نعم، تأكيد</button><button onclick="closeModal('customConfirmModal')" class="theme-btn" style="flex:1; margin:0;">إلغاء</button></div></div></div>
     <div id="scannerModal" class="modal"><div class="modal-content" style="width: 400px; text-align: center;"><span class="close-btn" onclick="stopCameraScanner()">&times;</span><h2 style="margin-bottom: 15px; color: var(--primary-color);">مسح الباركود 📷</h2><div id="reader" style="width: 100%; min-height: 300px; border-radius: 12px; overflow: hidden; border: 2px dashed var(--primary-color);"></div><p style="margin-top: 15px; color: var(--text-muted); font-size: 14px;">وجه الكاميرا نحو الباركود للرصد</p></div></div>
     <div id="pinModal" class="modal"><div class="modal-content" style="width: 300px; text-align: center; margin: 20% auto;"><h3 style="margin-bottom: 15px;">الرقم السري للإدارة</h3><input type="password" id="adminPinInput" class="custom-input" placeholder="****" style="text-align: center; letter-spacing: 5px; font-size: 20px; margin-bottom: 15px;"><div style="display: flex; gap: 10px;"><button onclick="verifyPin()" class="save-btn" style="margin:0;">دخول</button><button onclick="closeModal('pinModal')" class="theme-btn" style="flex:1; margin:0;">إلغاء</button></div></div></div>
-
+<div id="closeSessionModal" class="modal">
+        <div class="modal-content" style="width: 450px;">
+            <span class="close-btn" onclick="closeModal('closeSessionModal')">&times;</span>
+            <h2 style="color: var(--danger-color); margin-bottom: 15px;">إغلاق الحصة 🔒</h2>
+            <p style="margin-bottom: 20px; color: var(--text-muted);">اختر محتويات التقرير الذي سيتم إرساله لأولياء الأمور عبر الواتساب:</p>
+            
+            <form id="closeSessionForm">
+                <input type="hidden" id="closeSessionId">
+                <div style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 16px; cursor: pointer;">
+                        <input type="checkbox" id="sendAttCheck" checked style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                        إرسال تقرير الحضور والغياب 📋
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 16px; cursor: pointer;">
+                        <input type="checkbox" id="sendExamCheck" checked style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                        تضمين درجة امتحان اليوم (إن وجد) ⭐
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; font-size: 16px; cursor: pointer;">
+                        <input type="checkbox" id="sendHwCheck" checked style="width: 18px; height: 18px; accent-color: var(--primary-color);">
+                        تضمين درجة واجب اليوم (إن وجد) 📚
+                    </label>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" class="save-btn" style="background-color: var(--success-color); flex: 2; margin: 0;" onclick="confirmCloseSession(true)">قفل وإرسال التقارير 🚀</button>
+                    <button type="button" class="theme-btn" style="flex: 1; border-color: var(--danger-color); color: var(--danger-color); margin: 0;" onclick="confirmCloseSession(false)">قفل فقط (بدون إرسال) 🤫</button>
+                </div>
+            </form>
+        </div>
+    </div>
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('settingsModal')">&times;</span>
