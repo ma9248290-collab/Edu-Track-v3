@@ -201,20 +201,6 @@ document.getElementById('settingsForm')?.addEventListener('submit', function(e) 
     closeModal('settingsModal');
 });
 
-async function sendAutoWhatsApp(phone, message) {
-    const instanceId = localStorage.getItem('waInstanceId');
-    const token = localStorage.getItem('waToken');
-    if(!instanceId || !token) return false;
-
-    let formattedPhone = "20" + phone.replace(/^0+/, '');
-    const url = `https://api.ultramsg.com/${instanceId}/messages/chat`;
-    const data = new URLSearchParams({ token: token, to: formattedPhone, body: message });
-
-    try {
-        let response = await fetch(url, { method: 'POST', body: data });
-        return response.ok;
-    } catch(e) { return false; }
-}
 
 // ==========================================
 // 8. الجدول الأسبوعي (ماتريكس)
@@ -570,16 +556,7 @@ function toggleSessionStatus(id) {
     }
 }
 
-// دالة مساعدة لعمل تأخير زمني
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
-// دالة لاختيار كلمة عشوائية من مصفوفة (لمنع تكرار النص بالضبط)
-function getRandomGreeting() {
-    const greetings = ["أهلاً بحضرتك", "مرحباً", "تحياتي", "السلام عليكم", "أهلاً بك"];
-    return greetings[Math.floor(Math.random() * greetings.length)];
-}
 
 
 // ==========================================
@@ -591,17 +568,9 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// 2. دالة الكلمات المترادفة (Spintax) لاختيار تحية عشوائية
-function getRandomGreeting() {
-    const greetings = ["أهلاً بحضرتك", "مرحباً بك", "تحياتي", "السلام عليكم", "أهلاً وسهلاً", "طاب يومك"];
-    return greetings[Math.floor(Math.random() * greetings.length)];
-}
 
-// 3. دالة البصمة العشوائية (Random Hash) لضمان اختلاف محتوى الرسالة 100%
-function generateRandomHash() {
-    // بيولد كود زي: 4F8A2B
-    return Math.random().toString(36).substring(2, 8).toUpperCase(); 
-}
+
+
 
 
 async function confirmCloseSession(sendMessages) {
@@ -1030,6 +999,13 @@ let isListening = false;
 let speechRecog = null;
 
 function toggleVoiceRecognition(mode, inputId) {
+
+    // التحقق من متصفح Brave ومنعه برسالة واضحة
+    if (navigator.brave && navigator.brave.isBrave) {
+        showToast("متصفح Brave يمنع الرصد الصوتي. يرجى استخدام متصفح Google Chrome ⚠️", "error");
+        return;
+    }
+
     const btn = document.getElementById(`voiceBtn_${mode}`);
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
@@ -1180,6 +1156,14 @@ function processVoiceCommand(text, mode, inputId) {
         }
     }
 }
+
+
+
+
+
+
+
+
 
 // ==========================================
 // التشغيل الأولي
