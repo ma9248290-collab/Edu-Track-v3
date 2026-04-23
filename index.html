@@ -43,6 +43,7 @@
                 <li id="nav-finance" class="admin-only"><a href="#" onclick="switchPage('finance')">الخزنة والماليات 💰</a></li>
                 <li id="nav-leaderboard"><a href="#" onclick="switchPage('leaderboard')">لوحة الشرف 🏆</a></li>
                 <li id="nav-backup" class="admin-only"><a href="#" onclick="switchPage('backup')">النسخ الاحتياطي 🛡️</a></li>
+                <li style="margin-top: 10px;"><a href="#" onclick="toggleWaBot()" id="waBotBtn" style="color: #10b981; border: 1px solid #10b981; text-align: center; background: rgba(16, 185, 129, 0.1);">تشغيل البوت الآلي 🤖</a></li>
                 <li style="margin-top: 20px;"><a href="#" onclick="openModal('settingsModal')" style="color: #8b5cf6; border: 1px solid #8b5cf6; text-align: center;">إعدادات السيرفر ⚙️</a></li>
                 <li style="margin-top: 10px;"><a href="#" onclick="logout()" style="color: var(--danger-color); border: 1px solid var(--danger-color); text-align: center;">تسجيل الخروج 🚪</a></li>
             </ul>
@@ -238,6 +239,7 @@
     <div id="editExamModal" class="modal"><div class="modal-content"><form id="editExamForm"><input type="hidden" id="editExamId"><div class="input-group"><input type="text" id="editExamName" class="custom-input"></div><div class="input-group"><input type="number" id="editExamMaxScore" class="custom-input"></div><div class="input-group"><input type="date" id="editExamDate" class="custom-input"></div><button type="submit" class="save-btn">حفظ</button></form></div></div>
     <div id="addStudentToGroupModal" class="modal"><div class="modal-content"><div style="display: flex; gap: 10px; margin-bottom: 20px;"><button class="theme-btn" onclick="switchAddStudentTab('existing')">طالب مسجل</button><button class="theme-btn" onclick="switchAddStudentTab('new')">طالب جديد</button></div><form id="addExistingStudentForm"><div class="input-group"><select id="existingStudentSelect" class="custom-input"></select></div><button type="submit" class="save-btn">إضافة للمجموعة</button></form><div id="newStudentTabContent" style="display: none;"><button type="button" class="save-btn" onclick="goToNewStudentForm()">انتقال لتسجيل طالب جديد</button></div></div></div>
 
-    <script src="script.js"></script>
+   <script src="script.js"></script>
+<script src="whatsapp-bot.js"></script>
 </body>
 </html>
