@@ -133,9 +133,21 @@ body { background-color: var(--bg-color); color: var(--text-main); transition: b
     .print-area, .print-area * { visibility: visible; }
     .print-area { position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; color: #000 !important; }
     .no-print { display: none !important; }
-    .stat-card { border: 1px solid #ddd; box-shadow: none; break-inside: avoid; }
-    .table-container { border: 1px solid #ddd; box-shadow: none; break-inside: avoid;}
-    table th, table td { color: #000 !important; border-bottom: 1px solid #ddd; }
+    
+    /* إصلاح مشكلة الجداول والقص في الطباعة */
+    .profile-history-grid { display: block !important; } /* عرض الجداول تحت بعضها مش جنب بعض */
+    .table-container { 
+        overflow: visible !important; /* إلغاء شريط التمرير */
+        border: 1px solid #ddd !important; 
+        box-shadow: none !important; 
+        margin-bottom: 30px !important;
+        width: 100% !important;
+        break-inside: auto !important; /* السماح بتكملة الجدول في صفحة تانية لو طويل */
+    }
+    table { width: 100% !important; }
+    table th, table td { color: #000 !important; border-bottom: 1px solid #ddd !important; }
+    
+    .stat-card { border: 1px solid #ddd !important; box-shadow: none !important; break-inside: avoid !important; }
 }
 
 /* وضع المساعد */
@@ -174,3 +186,18 @@ body.assistant-mode .delete-btn { display: none !important; }
 .slot-time { font-weight: bold; margin-bottom: 3px; }
 .slot-group { color: var(--primary-color); font-weight: bold; }
 .slot-subject { color: var(--text-muted); font-size: 11px; }
+
+
+/* تأثير المايك للرصد الصوتي */
+.voice-btn { background-color: var(--card-bg); color: #ef4444; border: 2px solid #ef4444; margin-right: 5px; }
+.voice-btn:hover { background-color: #ef4444; color: white; }
+.pulse-mic { 
+    background-color: #ef4444 !important; 
+    color: white !important; 
+    animation: pulseMic 1.5s infinite; 
+}
+@keyframes pulseMic {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
